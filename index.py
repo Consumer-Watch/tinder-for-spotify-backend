@@ -47,6 +47,28 @@ def profile():
         return success_response(data) #client should store this
     except:
         return error_response()
+    
+@app.route('/renew-token')
+def renew_token():
+    refresh_token = request.get_json().get('refresh_token', None);
+
+    url = "https://accounts.spotify.com/api/token" 
+
+    body = { 
+        "refresh_token": refresh_token,   
+        "grant_type": "refresh_token",
+        "client_id": os.getenv("CLIENT_ID"),
+        "client_secret": os.getenv("CLIENT_SECRET"),
+
+    } 
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    data = requests.post(url, data=body, headers=headers)
+    reponse_data = data.json();
+    return success_response(reponse_data)
 
 
 @app.route('/me')
