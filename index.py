@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, jsonify
 from spotify_config import spotify
 import requests
 import os
+from utils.responses import success_response, error_response
 
 app = Flask(__name__)
 
@@ -27,15 +28,23 @@ def index_route():
         "Content-Type": "application/x-www-form-urlencoded",
         "grant_type": "refresh_token"
     }
-    data = requests.get(url, params=body, headers=headers)
-    print(data.url)
-    return jsonify({ "url": data.url })
+    try:
+        data = requests.get(url, params=body, headers=headers)
+        response_data = { "url": data.url }
+        return success_response(response_data)
+    except:
+        return error_response()
+
 
 @app.route('/token')
 def profile():
     code = request.args.get("code")
-    data = spotify(code)
-    return jsonify(data) #client should store this
+    try:
+        data = spotify(code)
+        return success_response(data) #client should store this
+    except:
+        return error_response()
+
 
 @app.route('/me')
 def me_route():
@@ -45,9 +54,14 @@ def me_route():
     headers = {
         "Authorization": f"Bearer {access_token}"
     }
-    data = requests.get("https://api.spotify.com/v1/me", headers=headers)
-    #data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
-    return jsonify(data.json())
+
+    try:
+        data = requests.get("https://api.spotify.com/v1/me", headers=headers)
+        #data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
+        profile_data = data.json()
+        return success_response(profile_data)
+    except:
+        return error_response()
 
 if __name__ == "__main__":
     app.run(debug=True)
