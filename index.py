@@ -7,6 +7,10 @@ app = Flask(__name__)
 
 file_write = open("tokens.txt", "a")
 
+@app.route("/")
+def welcome():
+    return "Welcome to Spotinder!"
+
 @app.route('/login', methods=["GET"])
 def index_route():
 
@@ -27,7 +31,7 @@ def index_route():
     print(data.url)
     return jsonify({ "url": data.url })
 
-@app.route('/profile')
+@app.route('/token')
 def profile():
     code = request.args.get("code")
     data = spotify(code)
