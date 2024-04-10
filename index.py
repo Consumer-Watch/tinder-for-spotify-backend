@@ -19,8 +19,8 @@ def index_route():
     body = { 
         "client_id": os.getenv("CLIENT_ID"),   
         "client_secret": os.getenv("CLIENT_SECRET"),
-        "redirect_uri": "http://localhost:5000/profile",
-        "scope": "user-read-private user-read-email user-top-read",
+        "redirect_uri": os.getenv("REDIRECT_URI"),
+        "scope": "user-read-private user-read-email user-top-read user-library-read user-read-currently-playing",
         "response_type": "code"
     }  # replace with your actual request body
     headers = {
@@ -35,23 +35,19 @@ def index_route():
 def profile():
     code = request.args.get("code")
     data = spotify(code)
-    print (data)
-    file_write.write(f'''
-Access Token:{data['access_token']}
-Refresh Token:{data['refresh_token']}
-                     ''')
-    file_write.close()
     return jsonify(data) #client should store this
 
 @app.route('/me')
 def me_route():
-    request.headers.get("")
+    request_body = request.get_json()
+    access_token = request_body.get('access_token', None)
+
     headers = {
-        "Authorization": "Bearer BQAbTaShrjpuLdmlTlQ74rikYv2u1b4GylYehdLmeSileiGdxcWwTFiCe-VrI3apoGEA_7pHdK1Yk6k5Ghidiokfn31L8CDhSfOJHQVyCh0geOpuhxX38BfVON6yHJUGEi_pDoNNQ2RwXJUnMOZRaUewSPsyVZ81qbv1e-BUf36FadvuVVjCEWDx2efhe338n8YUx3wYL788byHfyYDS5x32mo4"
+        "Authorization": f"Bearer {access_token}"
     }
     data = requests.get("https://api.spotify.com/v1/me", headers=headers)
-    data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
-    return jsonify(data2.json())
+    #data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
+    return jsonify(data.json())
 
 if __name__ == "__main__":
     app.run(debug=True)
