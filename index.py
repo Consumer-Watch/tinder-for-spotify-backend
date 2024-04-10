@@ -51,6 +51,8 @@ def profile():
 @app.route('/renew-token')
 def renew_token():
     refresh_token = request.get_json().get('refresh_token', None);
+    if refresh_token == None:
+        return error_response(400, "No refresh token in request")    
 
     url = "https://accounts.spotify.com/api/token" 
 
@@ -66,9 +68,12 @@ def renew_token():
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
-    data = requests.post(url, data=body, headers=headers)
-    reponse_data = data.json();
-    return success_response(reponse_data)
+    try:
+        data = requests.post(url, data=body, headers=headers)
+        reponse_data = data.json();
+        return success_response(reponse_data)
+    except:
+        return error_response()
 
 
 @app.route('/me')
