@@ -3,8 +3,22 @@ from spotify_config import spotify
 import requests
 import os
 from utils.responses import success_response, error_response
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+#from flask_script import Manager
+
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fortunealebiosu710:unGlLBvUt76I@ep-empty-wood-a5yfcpvw-pooler.us-east-2.aws.neon.tech/spotinder?sslmode=require'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+#db.init_app(app)
+migrate.init_app(app, db)
+#manager = Manager(app)
+
+#manager.add_command('db', migrate)
 
 file_write = open("tokens.txt", "a")
 
