@@ -39,6 +39,9 @@ def index_route():
 @app.route('/token')
 def profile():
     code = request.args.get("code")
+    if code == None:
+        return error_response(400, "No Authorization Code In Params")
+    
     try:
         data = spotify(code)
         return success_response(data) #client should store this
@@ -51,6 +54,9 @@ def me_route():
     request_body = request.get_json()
     access_token = request_body.get('access_token', None)
 
+    if access_token == None:
+        return error_response(400, "Acccess Token not present in request")
+
     headers = {
         "Authorization": f"Bearer {access_token}"
     }
@@ -62,6 +68,9 @@ def me_route():
         return success_response(profile_data)
     except:
         return error_response()
+    
+environment = os.getenv("ENV")
+debug_mode = False if environment == 'prod' else True
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=debug_mode)
