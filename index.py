@@ -3,8 +3,22 @@ from spotify_config import spotify
 import requests
 import os
 from utils.responses import success_response, error_response
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+#from flask_script import Manager
+
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fortunealebiosu710:unGlLBvUt76I@ep-empty-wood-a5yfcpvw-pooler.us-east-2.aws.neon.tech/spotinder?sslmode=require'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+#db.init_app(app)
+migrate.init_app(app, db)
+#manager = Manager(app)
+
+#manager.add_command('db', migrate)
 
 file_write = open("tokens.txt", "a")
 
@@ -39,9 +53,39 @@ def index_route():
 @app.route('/token')
 def profile():
     code = request.args.get("code")
+    if code == None:
+        return error_response(400, "No Authorization Code In Params")
+    
     try:
         data = spotify(code)
         return success_response(data) #client should store this
+    except:
+        return error_response()
+    
+@app.route('/renew-token')
+def renew_token():
+    refresh_token = request.get_json().get('refresh_token', None);
+    if refresh_token == None:
+        return error_response(400, "No refresh token in request")    
+
+    url = "https://accounts.spotify.com/api/token" 
+
+    body = { 
+        "refresh_token": refresh_token,   
+        "grant_type": "refresh_token",
+        "client_id": os.getenv("CLIENT_ID"),
+        "client_secret": os.getenv("CLIENT_SECRET"),
+
+    } 
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    try:
+        data = requests.post(url, data=body, headers=headers)
+        reponse_data = data.json();
+        return success_response(reponse_data)
     except:
         return error_response()
 
@@ -50,6 +94,9 @@ def profile():
 def me_route():
     request_body = request.get_json()
     access_token = request_body.get('access_token', None)
+
+    if access_token == None:
+        return error_response(400, "Acccess Token not present in request")
 
     headers = {
         "Authorization": f"Bearer {access_token}"
@@ -62,6 +109,9 @@ def me_route():
         return success_response(profile_data)
     except:
         return error_response()
+    
+environment = os.getenv("ENV")
+debug_mode = False if environment == 'prod' else True
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=debug_mode)
