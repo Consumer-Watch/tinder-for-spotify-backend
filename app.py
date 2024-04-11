@@ -21,7 +21,6 @@ migrate.init_app(app, db)
 
 #manager.add_command('db', migrate)
 
-file_write = open("tokens.txt", "a")
 
 @app.route("/")
 def welcome():
