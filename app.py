@@ -5,14 +5,15 @@ import os
 from utils.responses import success_response, error_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-#from flask_script import Manager
+
+from config.app import app
+from config.database import db
+
+from controllers.user import create_user
+
+from routes import user
 
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fortunealebiosu710:unGlLBvUt76I@ep-empty-wood-a5yfcpvw-pooler.us-east-2.aws.neon.tech/spotinder?sslmode=require'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 #db.init_app(app)
 migrate.init_app(app, db)
@@ -104,10 +105,11 @@ def me_route():
 
     try:
         data = requests.get("https://api.spotify.com/v1/me", headers=headers)
+
         #data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
         profile_data = data.json()
-        return success_response(profile_data)
-    except:
+        return create_user(profile_data)
+    except Exception:
         return error_response()
     
 environment = os.getenv("ENV")
