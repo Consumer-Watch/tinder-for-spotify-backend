@@ -27,6 +27,6 @@ jobs:
 
     - name: Run Flask DB Migrations
       run: |
-        export FLASK_APP=your_flask_app.py
+        export FLASK_APP=app.py
         flask db migrate
         flask db upgrade
