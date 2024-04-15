@@ -6,7 +6,7 @@ from datetime import datetime
 class Artist(db.Model):
     __tablename__ = "artists"
 
-    id = db.Column(db.String(15), primary_key=True)
+    id = db.Column(db.String(), primary_key=True)
     name = db.Column(db.String(60))
     image = db.Column(db.String())
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
