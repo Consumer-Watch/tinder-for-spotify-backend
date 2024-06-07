@@ -6,4 +6,11 @@ git clone
 
 cd tinder-for
 ```
-3. 
+3. dfdf
+
+
+4. To make migrations 
+```bash
+flask run migrate -m "Migration message"
+flask db upgrade
+```
