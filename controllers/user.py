@@ -1,6 +1,8 @@
 from models.user import User
 from flask import request, jsonify
 from config.database import db
+from models.usertopartists import UserTopArtists
+from models.usertoptracks import UserTopTracks
 from utils.responses import success_response, error_response
 import requests
 
@@ -45,6 +47,30 @@ def update_user(id: str, updated_fields: any):
         
         User.query.filter_by(id = id).update(**updated_fields)
         return success_response(None, 200)
+    except Exception as e:
+        return error_response(500, str(e))
+    
+
+def get_all_users():
+    try:
+        
+        users = db.session.query(User, UserTopArtists, UserTopTracks).join(
+            UserTopArtists
+        ).all()
+
+
+        users = [{
+            **user.toDict(),
+            "artist": user_top_artists.toDict()["artists"]["data"][0],
+            "track": user_top_tracks.toDict()["tracks"]["data"][0],
+
+        } for (
+            user, 
+            user_top_artists, 
+            user_top_tracks
+        ) in users]
+
+        return success_response(users)
     except Exception as e:
         return error_response(500, str(e))
     

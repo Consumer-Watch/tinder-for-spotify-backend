@@ -1,6 +1,6 @@
 from config.app import app
 from flask import request
-from controllers.user import get_user
+from controllers.user import get_all_users, get_user
 from controllers.usertopartists import get_top_artists
 from utils.responses import error_response, success_response
 from utils.spotify import get_top_items_from_api
@@ -47,3 +47,8 @@ def get_top_items(type: str):
         return success_response(top_items["data"], 201)
     except Exception as e:
         return error_response(500, str(e))
+
+
+@app.route('/users')
+def get_similar_users():
+    return get_all_users()
