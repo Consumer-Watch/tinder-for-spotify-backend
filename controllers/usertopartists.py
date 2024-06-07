@@ -1,39 +1,40 @@
 from models.usertopartists import UserTopArtists
-from models.artists import Artist
 from config.database import db
 from utils.functions import generate_random_id
-from utils.responses import success_response
+from utils.spotify import get_top_items_from_api as top_artists
 
-def create_top_artist(user_id: str, artist_id: str, position: int):
-    existing_top_artist = UserTopArtists.query.filter_by(
-        artist_id = artist_id,
-        user_id = user_id
-    )
+def create_top_artist(user_id: str, access_token: str):
+    existing_top_artist = UserTopArtists.query.filter_by(user_id = user_id).one_or_none()
+    
 
     if existing_top_artist is None:
+        top_items = top_artists(
+            type = "artists",
+            access_token = access_token
+        )
+
+        artists = { "data" : top_items }
+
         new_id = generate_random_id(15)
         new_top_artist = UserTopArtists(
             id = new_id,
             user_id = user_id,
-            artist_id = artist_id,
-            position_for_user = position,
+            artists = artists,
         )
         db.session.add(new_top_artist)
         db.session.commit()
+        return new_top_artist.toDict()["artists"]
+    
+    return existing_top_artist.toDict()["artists"]
+
 
 def get_top_artists(id: str):
-    #top_artists = UserTopArtists.query.filter_by(user_id = id).order_by(UserTopArtists.position_for_user.asc())
-    #top_artists = top_artists.toDict()
 
-    top_artists = db.session.query(UserTopArtists, Artist).join(Artist, UserTopArtists.artist_id == Artist.id).filter(UserTopArtists.user_id == id).order_by(UserTopArtists.position_for_user.asc()).all()
-    top_artists = [({ 
-        "name": artist.toDict()["name"],
-        "id": artist.toDict()["id"], 
-        "image": artist.toDict()["image"],
-        "position": user_top_artist.toDict()["position_for_user"] 
-    }) for user_top_artist, artist in top_artists]
-    return success_response(top_artists)
-
+    top_artists = UserTopArtists.query.filter_by(user_id = id).one_or_none()    
+    if top_artists is None:
+        return { "data": [] }
+    
+    return top_artists.toDict()["artists"]
     
 
 
