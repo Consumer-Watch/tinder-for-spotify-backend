@@ -2,6 +2,7 @@ from config.app import app
 from flask import request
 from controllers.user import get_all_users, get_user
 from controllers.usertopartists import get_top_artists
+from services.spotify import SpotifyService
 from utils.responses import error_response, success_response
 from utils.spotify import get_top_items_from_api
 
@@ -47,6 +48,23 @@ def get_top_items(type: str):
         return success_response(top_items["data"], 201)
     except Exception as e:
         return error_response(500, str(e))
+    
+@app.route('/users/me/playing', methods=['GET'])
+def currently_playing():
+    country = request.args.get('country', None)
+    authorization = request.headers['Authorization']
+
+    if country == '' or country is None:
+        return error_response(400, 'country is not present in params')
+    
+    if authorization is None or authorization == '':
+        return error_response(401, 'Authorization Header not present')
+
+    try:
+        current_playing_data = SpotifyService.currently_playing_track(authorization, country)
+        return success_response(current_playing_data, 200)
+    except Exception as error:
+        return error_response(500, str(error))
 
 
 @app.route('/users')
