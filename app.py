@@ -10,7 +10,6 @@ from config.app import app
 from config.database import db
 
 from controllers.user import create_user
-
 from routes import user
 
 
@@ -86,8 +85,8 @@ def renew_token():
         data = requests.post(url, data=body, headers=headers)
         reponse_data = data.json();
         return success_response(reponse_data)
-    except:
-        return error_response()
+    except Exception as e:
+        return error_response(500, str(e))
 
 
 @app.route('/me')
@@ -107,9 +106,10 @@ def me_route():
 
         #data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
         profile_data = data.json()
+        #id_cache.set(access_token, profile_data["id"])
         return create_user(profile_data)
-    except Exception:
-        return error_response()
+    except Exception as e:
+        return error_response(500, str(e))
     
 environment = os.getenv("ENV")
 debug_mode = False if environment == 'prod' else True
