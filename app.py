@@ -10,7 +10,7 @@ from config.app import app
 from config.database import db
 
 from controllers.user import create_user
-from routes import user
+from routes import user, friends
 
 
 migrate = Migrate(app, db)
