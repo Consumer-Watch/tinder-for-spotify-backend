@@ -7,6 +7,7 @@ class FriendRequestStatus(Enum):
     pending = "pending"
     accepted = "accepted"
     rejeted = "rejected"
+    blocked = "blocked"
 
 class FriendRequests(db.Model):
     __tablename__ = "friend-requests"
