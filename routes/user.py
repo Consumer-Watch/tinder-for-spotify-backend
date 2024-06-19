@@ -31,16 +31,15 @@ def get_top_items(type: str):
     if request.method == "GET":
         return error_response(405, "Method not allowed")
     
-    access_token = request.get_json().get('access_token', None);
-    user_id = request.get_json().get('user_id', None);
+    authorization = request.headers['Authorization']
 
+    user_id = request.get_json().get('user_id', None);
     try:
-        
         if type == "artists":
-            top_items = create_top_artist(user_id, access_token)
+            top_items = create_top_artist(user_id, authorization)
             
         elif type == "tracks":
-            top_items = create_top_track(user_id, access_token)
+            top_items = create_top_track(user_id, authorization)
             
         else:
             return error_response(400, "Invalid Selection")
