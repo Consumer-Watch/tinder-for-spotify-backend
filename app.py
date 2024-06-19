@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, jsonify
+from services.spotify import SpotifyService
 from spotify_config import spotify
 import requests
 import os
@@ -56,34 +57,20 @@ def profile():
         return error_response(400, "No Authorization Code In Params")
     
     try:
-        data = spotify(code)
+        data = SpotifyService.get_credentials(code)
         return success_response(data) #client should store this
     except:
         return error_response()
     
 @app.route('/renew-token')
 def renew_token():
-    refresh_token = request.get_json().get('refresh_token', None);
+    refresh_token = request.headers['Refresh']
+
     if refresh_token == None:
         return error_response(400, "No refresh token in request")    
 
-    url = "https://accounts.spotify.com/api/token" 
-
-    body = { 
-        "refresh_token": refresh_token,   
-        "grant_type": "refresh_token",
-        "client_id": os.getenv("CLIENT_ID"),
-        "client_secret": os.getenv("CLIENT_SECRET"),
-
-    } 
-
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-    }
-
     try:
-        data = requests.post(url, data=body, headers=headers)
-        reponse_data = data.json();
+        reponse_data = SpotifyService.renew_token(refresh_token);
         return success_response(reponse_data)
     except Exception as e:
         return error_response(500, str(e))
@@ -91,25 +78,18 @@ def renew_token():
 
 @app.route('/me')
 def me_route():
-    request_body = request.get_json()
-    access_token = request_body.get('access_token', None)
+    authorization = request.headers['Authorization']
 
-    if access_token == None:
+    if authorization == None:
         return error_response(400, "Acccess Token not present in request")
 
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
-
     try:
-        data = requests.get("https://api.spotify.com/v1/me", headers=headers)
-
-        #data2 = requests.get("https://api.spotify.com/v1/me/top/artists", headers=headers)
-        profile_data = data.json()
+        profile_data = SpotifyService.get_current_user(authorization)
         #id_cache.set(access_token, profile_data["id"])
         return create_user(profile_data)
     except Exception as e:
         return error_response(500, str(e))
+    
     
 environment = os.getenv("ENV")
 debug_mode = False if environment == 'prod' else True

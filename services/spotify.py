@@ -1,3 +1,4 @@
+from os import getenv
 import requests
 
 class SpotifyService:
@@ -28,3 +29,84 @@ class SpotifyService:
             "image": image,
             "artists": [artist['name'] for artist in artists] if artists else [episode_publisher]
         }
+    
+    @classmethod
+    def get_top_items(cls, authorization: str, type: str) -> list[dict[str, any]]:
+        params = { "limit": 15, "offset": 0, "time_range": "medium_term" }
+        headers = { "Authorization": authorization }
+
+        url = f"{cls.base_url}/me/top/{type}"
+        response = requests.get(url=url, params=params, headers=headers)
+        top_items = response.json()["items"]
+
+        #change this from top_artists
+        if type == "artists":
+            items = [{
+                "name": item["name"], 
+                "image": item['images'][-1]['url'] if item['images'] else None, 
+                "id": item["id"], 
+                "position": index + 1,
+
+            } for index, item in enumerate(top_items)]
+    
+        elif type == "tracks":
+            items = [{
+                "name": item["name"], 
+                "image": item['album']['images'][1]['url'] if item['album']['images'] else None, 
+                "id": item["id"], 
+                "position": index+1,
+                "preview_url": item["preview_url"],
+                "artists": [{ 
+                    "id": artist["id"], 
+                    "name": artist["name"],
+                    "image": ""
+                } for artist in item["artists"]] if item["artists"] else None
+
+            } for index, item in enumerate(top_items)]
+        else:
+            items = []        
+    
+        return items
+    
+    @classmethod
+    def get_credentials(cls, code: str):
+        url = "https://accounts.spotify.com/api/token" 
+        # replace with your actual API endpoint
+        body = { 
+            "code": str(code),   
+            "redirect_uri": getenv("REDIRECT_URI"),
+            "grant_type": "authorization_code",
+            "client_id": getenv("CLIENT_ID"),
+            "client_secret": getenv("CLIENT_SECRET"),
+        }  # replace with your actual request body
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        data = requests.post(url, data=body, headers=headers)
+        return data.json()
+    
+    @classmethod
+    def renew_token(cls, refresh_token: str):
+        url = "https://accounts.spotify.com/api/token" 
+
+        body = { 
+            "refresh_token": refresh_token,   
+            "grant_type": "refresh_token",
+            "client_id": getenv("CLIENT_ID"),
+            "client_secret": getenv("CLIENT_SECRET"),
+
+        } 
+        headers = { "Content-Type": "application/x-www-form-urlencoded" }
+        data = requests.post(url, data=body, headers=headers)
+        return data.json();
+
+    @classmethod
+    def get_current_user(cls, authorization: str):
+        headers = { "Authorization": authorization }
+        data = requests.get(f"{cls.base_url}/me", headers=headers)
+        return data.json()
+
+
+
+
