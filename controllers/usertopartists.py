@@ -1,17 +1,15 @@
 from models.usertopartists import UserTopArtists
 from config.database import db
+from services.spotify import SpotifyService
 from utils.functions import generate_random_id
 from utils.spotify import get_top_items_from_api as top_artists
 
-def create_top_artist(user_id: str, access_token: str):
+def create_top_artist(user_id: str, authorization: str):
     existing_top_artist = UserTopArtists.query.filter_by(user_id = user_id).one_or_none()
     
 
     if existing_top_artist is None:
-        top_items = top_artists(
-            type = "artists",
-            access_token = access_token
-        )
+        top_items = SpotifyService.get_top_items(authorization, "artists")
 
         artists = { "data" : top_items }
 

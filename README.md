@@ -39,7 +39,7 @@ python app.py
 
 6. To make migrations on database models
 ```bash
-flask run migrate -m "Migration message"
+flask db migrate -m "Migration message"
 flask db upgrade
 ```
 
