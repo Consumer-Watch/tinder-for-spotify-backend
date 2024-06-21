@@ -8,6 +8,7 @@ from utils.spotify import get_top_items_from_api
 
 from controllers.usertopartists import create_top_artist
 from controllers.usertoptracks import create_top_track, get_top_tracks
+from validators.spotify import SpotifyError
 
 @app.route('/users/<id>', methods=["GET", "PUT", "DELETE"])
 def users_route(id: str):
@@ -28,10 +29,13 @@ def user_top_items(id: str, type: str):
     
 @app.route('/users/me/top/<type>', methods=["POST"])
 def get_top_items(type: str):
-    if request.method == "GET":
+    if request.method != "POST":
         return error_response(405, "Method not allowed")
     
-    authorization = request.headers['Authorization']
+    authorization = request.headers.get('Authorization', None)
+
+    if authorization is None or authorization == '':
+        return error_response(400, "Authorization Header not present")
 
     user_id = request.get_json().get('user_id', None);
     try:
@@ -45,6 +49,10 @@ def get_top_items(type: str):
             return error_response(400, "Invalid Selection")
 
         return success_response(top_items["data"], 201)
+    
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
+
     except Exception as e:
         return error_response(500, str(e))
     
@@ -62,6 +70,8 @@ def currently_playing():
     try:
         current_playing_data = SpotifyService.currently_playing_track(authorization, country)
         return success_response(current_playing_data, 200)
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
     except Exception as error:
         return error_response(500, str(error))
 
