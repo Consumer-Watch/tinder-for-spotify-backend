@@ -1,6 +1,8 @@
 from os import getenv
 import requests
 
+from validators.spotify import SpotifyError, raise_error
+
 class SpotifyService:
     base_url = "https://api.spotify.com/v1"
 
@@ -14,6 +16,9 @@ class SpotifyService:
         params = { "market": country }
         response = requests.get(url=url, headers=header, params=params)
         currently_playing = response.json()
+        
+        raise_error(currently_playing)
+
         audio_item = currently_playing["item"]
 
         image = audio_item['images'][0]['url'] if audio_item.get('images', None) else audio_item['album']['images'][0]['url']
@@ -37,7 +42,10 @@ class SpotifyService:
 
         url = f"{cls.base_url}/me/top/{type}"
         response = requests.get(url=url, params=params, headers=headers)
-        top_items = response.json()["items"]
+        response_data = response.json()
+        raise_error(response_data)
+
+        top_items = response_data["items"]
 
         #change this from top_artists
         if type == "artists":
@@ -104,8 +112,11 @@ class SpotifyService:
     @classmethod
     def get_current_user(cls, authorization: str):
         headers = { "Authorization": authorization }
-        data = requests.get(f"{cls.base_url}/me", headers=headers)
-        return data.json()
+        response = requests.get(f"{cls.base_url}/me", headers=headers)
+        response_data = response.json()
+        raise_error(response_data)
+
+        return response_data
 
 
 
