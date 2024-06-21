@@ -12,6 +12,7 @@ from config.database import db
 
 from controllers.user import create_user
 from routes import user, friends
+from validators.spotify import SpotifyError
 
 
 migrate = Migrate(app, db)
@@ -87,6 +88,10 @@ def me_route():
         profile_data = SpotifyService.get_current_user(authorization)
         #id_cache.set(access_token, profile_data["id"])
         return create_user(profile_data)
+    
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
+    
     except Exception as e:
         return error_response(500, str(e))
     

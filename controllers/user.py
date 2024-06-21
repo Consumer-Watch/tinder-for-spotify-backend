@@ -6,6 +6,8 @@ from models.usertoptracks import UserTopTracks
 from utils.responses import success_response, error_response
 import requests
 
+from validators.spotify import SpotifyError
+
 
 def create_user(user_data: any):
     try:
@@ -25,6 +27,10 @@ def create_user(user_data: any):
         db.session.add(new_user)
         db.session.commit()
         return success_response(user_data, 201)
+    
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
+
     except Exception as e:
         return error_response(400, str(e))
 
