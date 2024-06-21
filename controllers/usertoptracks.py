@@ -1,3 +1,4 @@
+from datetime import datetime
 from models.usertoptracks import UserTopTracks
 from services.spotify import SpotifyService
 from utils.functions import generate_random_id
@@ -25,6 +26,15 @@ def create_top_track(user_id: str, authorization: str):
         db.session.add(new_top_track)
         db.session.commit()
         return new_top_track.toDict()["tracks"]
+    
+    if existing_top_track.toDict()["next_update"] < datetime.now:
+        top_items = SpotifyService.get_top_items(authorization, "artists")
+        tracks = { "data" : top_items }
+        UserTopTracks.query.filter_by(id = existing_top_track.toDict()["id"]).update(
+            tracks = tracks
+        )
+        db.session.commit()
+
     
     return existing_top_track.toDict()["tracks"]
     
