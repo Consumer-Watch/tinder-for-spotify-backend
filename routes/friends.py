@@ -2,6 +2,8 @@ from config.app import app
 from flask import request
 
 from controllers.friends import accept_request, add_friend, block_friend, reject_request
+from controllers.user import update_user
+from models.user import User
 from utils.responses import error_response, success_response
 from validators.friends import validate_friend_request
 
@@ -23,8 +25,12 @@ def accept_friend_request():
     try:
         affected_rows = accept_request(sender, receiver)
         if affected_rows < 1:
-            return error_response(404, "Friend Request record nto found")
+            return error_response(404, "Friend Request record not found")
         
+        #Perform these in parallel
+        update_user(sender, { "friend_count": User.friend_count + 1 })
+        update_user(receiver, { "friend_count": User.friend_count + 1 })
+
         return success_response(None, 200)
     except Exception as error:
         return error_response(500, str(error))
