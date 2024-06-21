@@ -2,7 +2,7 @@ from datetime import datetime
 from models.usertopartists import UserTopArtists
 from config.database import db
 from services.spotify import SpotifyService
-from utils.functions import generate_random_id
+from utils.functions import generate_random_id, get_future_date
 
 def create_top_artist(user_id: str, authorization: str):
     existing_top_artist = UserTopArtists.query.filter_by(user_id = user_id).one_or_none()
@@ -23,17 +23,21 @@ def create_top_artist(user_id: str, authorization: str):
         db.session.commit()
         return new_top_artist.toDict()["artists"]
     
-    if existing_top_artist.toDict()["next_update"] < datetime.now:
+    top_artist = existing_top_artist.toDict()
+    if top_artist["next_update"] < datetime.now:
         top_items = SpotifyService.get_top_items(authorization, "artists")
         artists = { "data" : top_items }
+
+        updated_date = get_future_date(top_artist['next_update'])
         UserTopArtists.query.filter_by(id = existing_top_artist.toDict()["id"]).update(
-            artists = artists
+            artists = artists,
+            next_update = updated_date
         )
         db.session.commit()
 
 
     
-    return existing_top_artist.toDict()["artists"]
+    return top_artist["artists"]
 
 
 def get_top_artists(id: str):
