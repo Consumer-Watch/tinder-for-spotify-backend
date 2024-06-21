@@ -35,8 +35,6 @@ def create_top_artist(user_id: str, authorization: str):
         )
         db.session.commit()
 
-
-    
     return top_artist["artists"]
 
 
