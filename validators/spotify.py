@@ -8,7 +8,7 @@ class SpotifyError(Exception):
         self.message = message
 
 
-def catch_error(response_data):
+def raise_error(response_data):
     error = response_data.get('error', None)
     
     if error is not None:
