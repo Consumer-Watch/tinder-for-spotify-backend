@@ -12,6 +12,7 @@ from config.database import db
 
 from controllers.user import create_user
 from routes import user, friends
+from validators.spotify import SpotifyError
 
 
 migrate = Migrate(app, db)
@@ -35,7 +36,7 @@ def index_route():
         "client_id": os.getenv("CLIENT_ID"),   
         "client_secret": os.getenv("CLIENT_SECRET"),
         "redirect_uri": os.getenv("REDIRECT_URI"),
-        "scope": "user-read-private user-read-email user-top-read user-library-read user-read-currently-playing",
+        "scope": "user-read-private user-read-email user-top-read user-library-read user-read-currently-playing user-read-playback-state",
         "response_type": "code"
     }  # replace with your actual request body
     headers = {
@@ -87,6 +88,10 @@ def me_route():
         profile_data = SpotifyService.get_current_user(authorization)
         #id_cache.set(access_token, profile_data["id"])
         return create_user(profile_data)
+    
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
+    
     except Exception as e:
         return error_response(500, str(e))
     

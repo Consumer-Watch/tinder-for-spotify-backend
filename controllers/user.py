@@ -6,6 +6,8 @@ from models.usertoptracks import UserTopTracks
 from utils.responses import success_response, error_response
 import requests
 
+from validators.spotify import SpotifyError
+
 
 def create_user(user_data: any):
     try:
@@ -20,11 +22,18 @@ def create_user(user_data: any):
             name = user_data["display_name"],
             bio = "",
             email = user_data["email"],
-            profile_image = user_data["images"][-1]["url"]
+            profile_image = user_data["images"][-1]["url"],
+            country = user_data["country"],
+            banner = "",
+            friend_count = 0
         )
         db.session.add(new_user)
         db.session.commit()
         return success_response(user_data, 201)
+    
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
+
     except Exception as e:
         return error_response(400, str(e))
 
@@ -46,6 +55,7 @@ def update_user(id: str, updated_fields: any):
             return error_response(404, "User does not exist")
         
         User.query.filter_by(id = id).update(**updated_fields)
+        db.session.commit()
         return success_response(None, 200)
     except Exception as e:
         return error_response(500, str(e))
