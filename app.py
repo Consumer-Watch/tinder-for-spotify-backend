@@ -81,7 +81,7 @@ def me_route():
     authorization = request.headers['Authorization']
 
     if authorization == None:
-        return error_response(400, "Acccess Token not present in request")
+        return error_response(400, "Access Token not present in request")
 
     try:
         profile_data = SpotifyService.get_current_user(authorization)

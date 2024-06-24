@@ -1,10 +1,11 @@
 from config.app import app
-from flask import request
+from flask import request, jsonify
 from controllers.user import get_all_users, get_user
 from controllers.usertopartists import get_top_artists
 from services.spotify import SpotifyService
 from utils.responses import error_response, success_response
 from utils.spotify import get_top_items_from_api
+
 
 from controllers.usertopartists import create_top_artist
 from controllers.usertoptracks import create_top_track, get_top_tracks
@@ -24,7 +25,18 @@ def user_top_items(id: str, type: str):
         return success_response(tracks["data"], 200)
     else:
         return error_response(400, "Invalid Value for Type")
-
+    
+@app.route('/users/me/top/genres', methods=["POST"])
+def user_top_genres():
+    authorization = request.headers['Authorization']
+ 
+    try:  
+        # if not authorization:
+        #     return error_response(400, "Authorization Header not present")
+        top_genres = SpotifyService.get_top_items_genres(authorization)
+        return success_response(top_genres, 200)
+    except Exception as e:
+        return error_response(500, str(e))
     
 @app.route('/users/me/top/<type>', methods=["POST"])
 def get_top_items(type: str):

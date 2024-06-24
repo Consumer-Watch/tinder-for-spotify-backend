@@ -1,5 +1,8 @@
 from os import getenv
 import requests
+from collections import Counter
+from functools import lru_cache
+from config.app import app
 
 class SpotifyService:
     base_url = "https://api.spotify.com/v1"
@@ -63,10 +66,43 @@ class SpotifyService:
                 } for artist in item["artists"]] if item["artists"] else None
 
             } for index, item in enumerate(top_items)]
+
         else:
             items = []        
     
         return items
+    
+    @classmethod
+    def get_top_items_genres(cls, authorization: str) -> list[str]:
+        @lru_cache(maxsize=128)  # Adjust maxsize as needed
+        def _cached_get_top_items_genres(auth: str):
+            params = { "limit": 15, "offset": 0, "time_range": "medium_term" }
+            headers = { "Authorization": authorization }
+
+            url = f"{cls.base_url}/me/top/artists" 
+            response = requests.get(url=url, params= params, headers=headers)
+         # Check if the response status code indicates success
+            if response.status_code == 200:
+                try:
+                    top_artists = response.json()["items"]
+                except ValueError:
+            # Handle cases where the response is not in JSON format
+                    return f"Error parsing JSON from response: {response.text}"
+            else:
+        # Log or handle unsuccessful response
+                return f"Request failed with status code: {response.status_code}, response: {response.text}"
+        
+       
+            genre_counter = Counter()
+            for item in top_artists:
+                if "genres" in item:
+                    genre_counter.update(item["genres"])
+ 
+            top_genres = genre_counter.most_common(6)
+            top_genres_without_count = [genre[0] for genre in top_genres if genre]
+            return top_genres_without_count
+        return _cached_get_top_items_genres(authorization)
+    
     
     @classmethod
     def get_credentials(cls, code: str):
