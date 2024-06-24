@@ -18,6 +18,11 @@ class SpotifyService:
         currently_playing = response.json()
         
         raise_error(currently_playing)
+        devices_url = f"{cls.base_url}/me/player/devices"
+        devices_response = requests.get(url=devices_url, headers=header)
+        devices = devices_response.json().get('devices', None)
+
+        active_device = next((device for device in devices if device['is_active']), None)
 
         audio_item = currently_playing["item"]
 
@@ -32,6 +37,10 @@ class SpotifyService:
             "name": audio_item["name"],
             "duration": audio_item["duration_ms"],
             "image": image,
+            "device": {
+                "name": active_device["name"],
+                "type": active_device["type"]
+            },
             "artists": [artist['name'] for artist in artists] if artists else [episode_publisher]
         }
     
