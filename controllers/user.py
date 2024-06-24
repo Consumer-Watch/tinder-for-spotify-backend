@@ -22,7 +22,10 @@ def create_user(user_data: any):
             name = user_data["display_name"],
             bio = "",
             email = user_data["email"],
-            profile_image = user_data["images"][-1]["url"]
+            profile_image = user_data["images"][-1]["url"],
+            country = user_data["country"],
+            banner = "",
+            friend_count = 0
         )
         db.session.add(new_user)
         db.session.commit()
@@ -52,6 +55,7 @@ def update_user(id: str, updated_fields: any):
             return error_response(404, "User does not exist")
         
         User.query.filter_by(id = id).update(**updated_fields)
+        db.session.commit()
         return success_response(None, 200)
     except Exception as e:
         return error_response(500, str(e))

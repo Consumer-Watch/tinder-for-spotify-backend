@@ -11,6 +11,9 @@ class User(db.Model):
     bio = db.Column(db.String(120))
     profile_image = db.Column(db.String())
     email = db.Column(db.String(55)) #To send them email notifications
+    country = db.Column(db.String(2))
+    friend_count = db.Column(db.Integer, default=0)
+    banner = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 

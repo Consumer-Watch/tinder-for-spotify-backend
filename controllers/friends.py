@@ -27,6 +27,7 @@ def accept_request(sender: str, receiver: str):
     ).update(
         status = FriendRequestStatus.accepted
     )
+    db.session.commit()
     return existing_request #number of rows affected
 
 def reject_request(sender: str, receiver: str):
@@ -36,6 +37,7 @@ def reject_request(sender: str, receiver: str):
     ).update(
        status = FriendRequestStatus.rejeted
     )
+    db.session.commit()
     return existing_request #number of rows affected
 
 def block_friend(sender: str, receiver: str):
@@ -55,5 +57,6 @@ def block_friend(sender: str, receiver: str):
     ).update(
        status = FriendRequestStatus.rejeted
     )
+    db.session.commit()
     return request_2 #number of rows affected
 

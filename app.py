@@ -36,7 +36,7 @@ def index_route():
         "client_id": os.getenv("CLIENT_ID"),   
         "client_secret": os.getenv("CLIENT_SECRET"),
         "redirect_uri": os.getenv("REDIRECT_URI"),
-        "scope": "user-read-private user-read-email user-top-read user-library-read user-read-currently-playing",
+        "scope": "user-read-private user-read-email user-top-read user-library-read user-read-currently-playing user-read-playback-state",
         "response_type": "code"
     }  # replace with your actual request body
     headers = {
