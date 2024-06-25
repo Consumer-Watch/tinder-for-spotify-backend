@@ -29,7 +29,7 @@ def create_top_track(user_id: str, authorization: str):
     
     top_tracks = existing_top_track.toDict()
 
-    if top_tracks["next_update"] < datetime.now:
+    if top_tracks["next_update"] < datetime.now():
         top_items = SpotifyService.get_top_items(authorization, "artists")
         tracks = { "data" : top_items }
 
