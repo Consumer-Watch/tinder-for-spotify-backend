@@ -25,7 +25,9 @@ def accept_request(sender: str, receiver: str):
         user_id = sender,
         friend_id = receiver
     ).update(
-        status = FriendRequestStatus.accepted
+        values={
+            "status": FriendRequestStatus.accepted
+        }
     )
     db.session.commit()
     return existing_request #number of rows affected
@@ -35,7 +37,9 @@ def reject_request(sender: str, receiver: str):
         user_id = sender,
         friend_id = receiver
     ).update(
-       status = FriendRequestStatus.rejeted
+        values={
+            "status": FriendRequestStatus.rejeted
+        }
     )
     db.session.commit()
     return existing_request #number of rows affected
@@ -45,7 +49,9 @@ def block_friend(sender: str, receiver: str):
         user_id = sender,
         friend_id = receiver,
     ).update(
-       status = FriendRequestStatus.rejeted
+        values={
+            "status": FriendRequestStatus.blocked
+        }
     )
 
     if request_1 == 1:
@@ -55,7 +61,9 @@ def block_friend(sender: str, receiver: str):
         friend_id = sender,
         user_id = receiver
     ).update(
-       status = FriendRequestStatus.rejeted
+        values={
+            "status": FriendRequestStatus.rejeted
+        }
     )
     db.session.commit()
     return request_2 #number of rows affected
