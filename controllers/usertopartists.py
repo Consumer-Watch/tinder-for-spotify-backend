@@ -24,7 +24,7 @@ def create_top_artist(user_id: str, authorization: str):
         return new_top_artist.toDict()["artists"]
     
     top_artist = existing_top_artist.toDict()
-    if top_artist["next_update"] < datetime.now():
+    if top_artist['next_update'] is None or top_artist["next_update"] < datetime.now():
         top_items = SpotifyService.get_top_items(authorization, "artists")
         artists = { "data" : top_items }
 
