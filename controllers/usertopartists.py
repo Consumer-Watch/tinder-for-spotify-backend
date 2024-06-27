@@ -30,8 +30,10 @@ def create_top_artist(user_id: str, authorization: str):
 
         updated_date = get_future_date(top_artist['next_update'])
         UserTopArtists.query.filter_by(id = existing_top_artist.toDict()["id"]).update(
-            artists = artists,
-            next_update = updated_date
+            values={
+                "artists": artists,
+                "next_update": updated_date
+            }
         )
         db.session.commit()
 
