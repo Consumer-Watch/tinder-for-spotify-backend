@@ -11,9 +11,10 @@ from validators.spotify import SpotifyError
 
 def create_user(user_data: any):
     try:
-        user = User.query.get(user_data["id"]).toDict()
+        user = User.query.get(user_data["id"])
         
         if user is not None:
+            user = user.toDict()
             return success_response(user)
         
         new_user = User(
@@ -35,7 +36,7 @@ def create_user(user_data: any):
         return error_response(error.status_code, error.message)
 
     except Exception as e:
-        return error_response(400, str(e))
+        return error_response(500, str(e))
 
 
 
