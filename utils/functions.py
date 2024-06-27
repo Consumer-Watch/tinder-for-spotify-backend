@@ -9,3 +9,4 @@ def generate_random_id(length=10):
 def get_future_date(start_date: datetime, days: int = 30):
     DEFAULT_UPDATE_INTERVAL_DAYS = days
     DEFAULT_UPDATE = start_date + timedelta(days = DEFAULT_UPDATE_INTERVAL_DAYS)
+    return DEFAULT_UPDATE
