@@ -24,7 +24,7 @@ def create_top_genres(user_id: str, authorization: str):
         return new_top_genres.toDict()["genres"]
     
     top_genres = existing_top_genres.toDict()
-    if top_genres["next_update"] < datetime.now:
+    if top_genres["next_update"] < datetime.now():
         top_items = SpotifyService.get_top_items_genres(authorization)
         genres = { "data" : top_items }
 
