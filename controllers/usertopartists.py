@@ -24,14 +24,16 @@ def create_top_artist(user_id: str, authorization: str):
         return new_top_artist.toDict()["artists"]
     
     top_artist = existing_top_artist.toDict()
-    if top_artist["next_update"] < datetime.now:
+    if top_artist['next_update'] is None or top_artist["next_update"] < datetime.now():
         top_items = SpotifyService.get_top_items(authorization, "artists")
         artists = { "data" : top_items }
 
         updated_date = get_future_date(top_artist['next_update'])
-        UserTopArtists.query.filter_by(id = top_artist["id"]).update(
-            artists = artists,
-            next_update = updated_date
+        UserTopArtists.query.filter_by(id = existing_top_artist.toDict()["id"]).update(
+            values={
+                "artists": artists,
+                "next_update": updated_date
+            }
         )
         db.session.commit()
         #return updated Artists if top artists are updated

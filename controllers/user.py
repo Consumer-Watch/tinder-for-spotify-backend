@@ -46,7 +46,7 @@ def create_user(user_data: any):
         return error_response(error.status_code, error.message)
 
     except Exception as e:
-        return error_response(400, str(e))
+        return error_response(500, str(e))
 
 
 
@@ -65,7 +65,7 @@ def update_user(id: str, updated_fields: any):
         if user is None:
             return error_response(404, "User does not exist")
         
-        User.query.filter_by(id = id).update(**updated_fields)
+        User.query.filter_by(id = id).update(values={**updated_fields})
         db.session.commit()
         return success_response(None, 200)
     except Exception as e:

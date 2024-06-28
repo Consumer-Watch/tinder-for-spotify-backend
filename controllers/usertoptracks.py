@@ -28,15 +28,18 @@ def create_top_track(user_id: str, authorization: str):
         return new_top_track.toDict()["tracks"]
     
     top_tracks = existing_top_track.toDict()
+    print(top_tracks)
 
-    if top_tracks["next_update"] < datetime.now:
-        top_items = SpotifyService.get_top_items(authorization, "artists")
+    if top_tracks['next_update'] < datetime.now():
+        top_items = SpotifyService.get_top_items(authorization, "tracks")
         tracks = { "data" : top_items }
 
         updated_date = get_future_date(top_tracks['next_update'])
         UserTopTracks.query.filter_by(id = existing_top_track.toDict()["id"]).update(
-            tracks = tracks,
-            next_update = updated_date
+            values={
+                "tracks": tracks,
+                "next_update": updated_date
+            }
         )
         db.session.commit()
         #return updated tracks if top tracks are updated
