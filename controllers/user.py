@@ -75,20 +75,23 @@ def update_user(id: str, updated_fields: any):
 def get_all_users():
     try:
         
-        users = db.session.query(User, UserTopArtists, UserTopTracks).join(
-            UserTopArtists
-        ).all()
-
-
+        users = db.session.query(User, UserTopArtists, UserTopTracks, UserTopGenres).\
+        join(UserTopArtists).\
+        join(UserTopTracks).\
+        join(UserTopGenres).\
+        all()
+        
         users = [{
             **user.toDict(),
             "artist": user_top_artists.toDict()["artists"]["data"][0],
             "track": user_top_tracks.toDict()["tracks"]["data"][0],
+            "likes": user_top_genres.toDict()["genres"]["data"]
 
         } for (
             user, 
             user_top_artists, 
-            user_top_tracks
+            user_top_tracks,
+            user_top_genres
         ) in users]
 
         return success_response(users)
