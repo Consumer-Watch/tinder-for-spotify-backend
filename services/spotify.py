@@ -95,24 +95,18 @@ class SpotifyService:
 
             url = f"{cls.base_url}/me/top/artists" 
             response = requests.get(url=url, params= params, headers=headers)
-         # Check if the response status code indicates success
-            if response.status_code == 200:
-                try:
-                    top_artists = response.json()["items"]
-                except ValueError:
-            # Handle cases where the response is not in JSON format
-                    return f"Error parsing JSON from response: {response.text}"
-            else:
-        # Log or handle unsuccessful response
-                return f"Request failed with status code: {response.status_code}, response: {response.text}"
-        
-       
+            # Check if the response status code indicates success
+            if response.status_code != 200:
+                raise_error(response.json())
+
+            top_artists = response.json()["items"]
+               
             genre_counter = Counter()
             for item in top_artists:
                 if "genres" in item:
                     genre_counter.update(item["genres"])
  
-            top_genres = genre_counter.most_common(6)
+            top_genres = genre_counter.most_common(10)
             top_genres_without_count = [genre[0] for genre in top_genres if genre]
             return top_genres_without_count
         
