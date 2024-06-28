@@ -36,6 +36,11 @@ def create_top_artist(user_id: str, authorization: str):
             }
         )
         db.session.commit()
+        #return updated Artists if top artists are updated
+        
+        return artists
+
+    
 
     return top_artist["artists"]
 

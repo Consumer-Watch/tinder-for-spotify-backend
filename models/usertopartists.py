@@ -15,7 +15,7 @@ class UserTopArtists(db.Model):
     #artist_id = db.Column(db.String(), db.ForeignKey('artists.id'), index=True)
     #position_for_user = db.Column(db.Integer)
     artists = db.Column(JSONB)
-    next_update = db.Column(db.DateTime, default=get_future_date(datetime.today(), DEFAULT_UPDATE_INTERVAL_DAYS))
+    next_update = db.Column(db.DateTime, default = lambda : get_future_date(datetime.today(), DEFAULT_UPDATE_INTERVAL_DAYS))
 
     def toDict(self):
         return { c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs }
