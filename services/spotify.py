@@ -1,7 +1,6 @@
 from os import getenv
 import requests
 from collections import Counter
-from functools import lru_cache
 from config.app import app
 
 from validators.spotify import SpotifyError, raise_error
@@ -91,8 +90,6 @@ class SpotifyService:
     
     @classmethod
     def get_top_items_genres(cls, authorization: str) -> list[str]:
-        @lru_cache(maxsize=128)  # Adjust maxsize as needed
-        def _cached_get_top_items_genres(auth: str):
             params = { "limit": 15, "offset": 0, "time_range": "medium_term" }
             headers = { "Authorization": authorization }
 
@@ -118,7 +115,7 @@ class SpotifyService:
             top_genres = genre_counter.most_common(6)
             top_genres_without_count = [genre[0] for genre in top_genres if genre]
             return top_genres_without_count
-        return _cached_get_top_items_genres(authorization)
+        
     
     
     @classmethod

@@ -39,6 +39,8 @@ def create_top_track(user_id: str, authorization: str):
             next_update = updated_date
         )
         db.session.commit()
+        #return updated tracks if top tracks are updated
+        return tracks
 
     
     return top_tracks["tracks"]

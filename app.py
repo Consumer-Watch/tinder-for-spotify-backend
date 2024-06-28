@@ -12,6 +12,7 @@ from config.database import db
 
 from controllers.user import create_user
 from routes import user, friends
+from models.usertopgenres import UserTopGenres
 from validators.spotify import SpotifyError
 
 

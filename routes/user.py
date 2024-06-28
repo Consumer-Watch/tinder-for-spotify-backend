@@ -6,7 +6,7 @@ from services.spotify import SpotifyService
 from utils.responses import error_response, success_response
 from utils.spotify import get_top_items_from_api
 
-
+from controllers.usertopgenres import create_top_genres, get_top_genres
 from controllers.usertopartists import create_top_artist
 from controllers.usertoptracks import create_top_track, get_top_tracks
 from validators.spotify import SpotifyError
@@ -24,20 +24,14 @@ def user_top_items(id: str, type: str):
     elif type == 'tracks':
         tracks = get_top_tracks(id)
         return success_response(tracks["data"], 200)
+    elif type == 'genres':
+        genres = get_top_genres(id)
+        return success_response(genres["data"], 200)
+        
     else:
         return error_response(400, "Invalid Value for Type")
     
-@app.route('/users/me/top/genres', methods=["POST"])
-def user_top_genres():
-    authorization = request.headers['Authorization']
- 
-    try:  
-        # if not authorization:
-        #     return error_response(400, "Authorization Header not present")
-        top_genres = SpotifyService.get_top_items_genres(authorization)
-        return success_response(top_genres, 200)
-    except Exception as e:
-        return error_response(500, str(e))
+
     
 @app.route('/users/me/top/<type>', methods=["POST"])
 def get_top_items(type: str):
@@ -56,6 +50,9 @@ def get_top_items(type: str):
             
         elif type == "tracks":
             top_items = create_top_track(user_id, authorization)
+
+        elif type =="genres" :
+            top_items = create_top_genres(user_id,  authorization)
             
         else:
             return error_response(400, "Invalid Selection")
