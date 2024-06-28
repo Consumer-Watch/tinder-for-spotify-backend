@@ -44,6 +44,10 @@ def get_top_items(type: str):
         return error_response(400, "Authorization Header not present")
 
     user_id = request.get_json().get('user_id', None);
+
+    if user_id is None or user_id == '':
+        return error_response(400, "user_id is not present")
+    
     try:
         if type == "artists":
             top_items = create_top_artist(user_id, authorization)
