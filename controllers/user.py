@@ -10,43 +10,34 @@ import requests
 from validators.spotify import SpotifyError
 
 
-def create_user(user_data: any):
-    try:
-        user_instance = User.query.get(user_data["id"])
-        if user_instance is not None:
-            user_dict = user_instance.toDict()
-            return error_response( 400, "User already exists")
-        else:
-             # Handle the case where no user is found
-            # creates the new user and returns the data
-            new_user = User(
-            id = user_data["id"],
-            spotify_username = user_data["display_name"],
-            name = user_data["display_name"],
-            bio = "",
-            email = user_data["email"],
-            profile_image = user_data["images"][-1]["url"] if user_data["images"] else "",
-            country = user_data["country"],
-            banner = "",
-            friend_count = 0
-        )
-        new_user_dic = new_user.toDict()
-        db.session.add(new_user)
-        db.session.commit()
-        return success_response(f"user has been created, user data : {new_user_dic}", 201)
+def get_or_create_user(user_data: any):
+    user_instance = User.query.get(user_data["id"])
+    if user_instance is not None:
+        user = user_instance.toDict()
+        return success_response(user, 200)
+    
+    new_user = User(
+        id = user_data["id"],
+        spotify_username = user_data["display_name"],
+        name = user_data["display_name"],
+        bio = "",
+        email = user_data["email"],
+        profile_image = user_data["images"][-1]["url"] if user_data["images"] else "",
+        country = user_data["country"],
+        banner = "",
+        friend_count = 0
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    new_user = new_user.toDict()
+    return success_response(new_user, 201)
    
 
         
         
             
         
-       
-    
-    except SpotifyError as error:
-        return error_response(error.status_code, error.message)
-
-    except Exception as e:
-        return error_response(500, str(e))
 
 
 
