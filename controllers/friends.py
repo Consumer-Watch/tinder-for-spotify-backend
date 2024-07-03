@@ -68,3 +68,15 @@ def block_friend(sender: str, receiver: str):
     db.session.commit()
     return request_2 #number of rows affected
 
+def list_friend_requests(user_id: str):
+    friend_requests = FriendRequests.query.filter_by(
+        friend_id = user_id,
+        status = FriendRequestStatus.pending
+    ).all()
+
+    friend_requests = [
+       { **item.toDict() } for 
+       item in friend_requests
+   ] 
+    
+    return friend_requests
