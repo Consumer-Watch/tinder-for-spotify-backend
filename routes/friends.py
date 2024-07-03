@@ -1,7 +1,7 @@
 from config.app import app
 from flask import request
 
-from controllers.friends import accept_request, add_friend, block_friend, reject_request
+from controllers.friends import accept_request, add_friend, block_friend, list_friend_requests, reject_request
 from controllers.user import update_user
 from models.user import User
 from utils.responses import error_response, success_response
@@ -61,5 +61,19 @@ def block_user():
         return success_response(None, 200)
     except Exception as error:
         return error_response(500, str(error))
+    
+
+@app.route('/friends/requests', methods=["GET"])
+def get_friend_requests():
+    user_id = request.args.get('user_id', None)
+
+    if user_id is None or user_id == "":
+        return error_response(400,  "user_id not present in query string")
+    
+    try:
+        friend_requests = list_friend_requests(user_id)
+        return success_response(friend_requests)
+    except Exception as e:
+        return error_response(500, str(e))
 
 
