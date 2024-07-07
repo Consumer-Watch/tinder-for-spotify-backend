@@ -75,6 +75,28 @@ def block_friend(sender: str, receiver: str):
     db.session.commit()
     return request_2 #number of rows affected
 
+def check_friend_status(sender: str, receiver: str):
+    request_1 = FriendRequests.query.filter_by(
+        user_id = sender,
+        friend_id = receiver,
+        status = FriendRequestStatus.accepted
+    ).one_or_none()
+
+    if request_1 is not None:
+        return True
+
+    request_2 = FriendRequests.query.filter_by(
+        friend_id = sender,
+        user_id = receiver,
+        status = FriendRequestStatus.accepted
+    ).one_or_none()
+
+    if request_2 is not None:
+        return True
+    else:
+        return False
+
+
 def list_friend_requests(user_id: str):
     friend_requests = FriendRequests.query.filter_by(
         friend_id = user_id,
