@@ -79,11 +79,20 @@ def list_friend_requests(user_id: str):
     friend_requests = FriendRequests.query.filter_by(
         friend_id = user_id,
         status = FriendRequestStatus.pending
-    ).all()
+    ).\
+    all()
+    print(friend_requests, "requests")
 
     friend_requests = [
-       { **item.toDict() } for 
-       item in friend_requests
+       { 
+            "user_id": item.toDict()["user_id"] ,
+            "friend_id": item.toDict()["friend_id"],
+            "sender_username": item.toDict()["sender_username"],
+            "sender_avatar": item.toDict()["sender_avatar"],
+            "created_at": item.toDict()["created_at"],
+        } 
+        for item in friend_requests
    ] 
+    
     
     return friend_requests
