@@ -10,7 +10,7 @@ def add_friend(sender: str, receiver: str):
     ).one_or_none()
 
     if existing_request is None:
-        user = User.query.get(id = sender)
+        user = User.query.get({"id" : sender})
         user = user.toDict()
 
         new_request = FriendRequests(
@@ -22,6 +22,7 @@ def add_friend(sender: str, receiver: str):
         )
         db.session.add(new_request)
         db.session.commit()
+    # Select needed columns from DB
         return { **new_request.toDict(), "status": new_request.toDict()["status"].value }
     
     return { **existing_request.toDict(), "status": existing_request.toDict()["status"].value }
