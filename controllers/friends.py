@@ -1,17 +1,23 @@
 from models.friends import FriendRequestStatus, FriendRequests
+from models.user import User
 from config.database import db
 
 
 def add_friend(sender: str, receiver: str):
     existing_request = FriendRequests.query.filter_by(
         user_id = sender,
-        friend_id = receiver
+        friend_id = receiver,
     ).one_or_none()
 
     if existing_request is None:
+        user = User.query.get(id = sender)
+        user = user.toDict()
+
         new_request = FriendRequests(
             user_id = sender,
             friend_id = receiver,
+            sender_username = user.get('spotify_username', ''),
+            sender_avatar = user.get('profile_image', ''),
             status = FriendRequestStatus.pending
         )
         db.session.add(new_request)
