@@ -44,7 +44,7 @@ def create_top_artist(user_id: str, authorization: str):
 
     return top_artist["artists"]
 
-
+    
 def get_top_artists(id: str):
 
     top_artists = UserTopArtists.query.filter_by(user_id = id).one_or_none()    
