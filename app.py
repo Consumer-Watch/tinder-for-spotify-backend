@@ -1,19 +1,14 @@
 from flask import Flask, request, redirect, jsonify
 from services.spotify import SpotifyService
-from spotify_config import spotify
 import requests
 import os
 from utils.responses import success_response, error_response
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 from config.app import app
 from config.database import db
 
-from controllers.user import create_user
 from routes import user, friends
-from models.usertopgenres import UserTopGenres
-from validators.spotify import SpotifyError
 
 
 migrate = Migrate(app, db)
@@ -74,25 +69,6 @@ def renew_token():
     try:
         reponse_data = SpotifyService.renew_token(refresh_token);
         return success_response(reponse_data)
-    except Exception as e:
-        return error_response(500, str(e))
-
-
-@app.route('/me')
-def me_route():
-    authorization = request.headers['Authorization']
-
-    if authorization == None:
-        return error_response(400, "Access Token not present in request")
-
-    try:
-        profile_data = SpotifyService.get_current_user(authorization)
-        #id_cache.set(access_token, profile_data["id"])
-        return create_user(profile_data)
-    
-    except SpotifyError as error:
-        return error_response(error.status_code, error.message)
-    
     except Exception as e:
         return error_response(500, str(e))
     

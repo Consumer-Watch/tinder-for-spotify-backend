@@ -1,6 +1,6 @@
 from config.app import app
 from flask import request, jsonify
-from controllers.user import get_all_users, get_user
+from controllers.user import get_all_users, get_or_create_user, get_user
 from controllers.usertopartists import get_top_artists
 from services.spotify import SpotifyService
 from utils.responses import error_response, success_response
@@ -10,6 +10,23 @@ from controllers.usertopgenres import create_top_genres, get_top_genres
 from controllers.usertopartists import create_top_artist
 from controllers.usertoptracks import create_top_track, get_top_tracks
 from validators.spotify import SpotifyError
+
+@app.route('/users/me')
+def me_route():
+    authorization = request.headers['Authorization']
+
+    if authorization == None:
+        return error_response(400, "Access Token not present in request")
+
+    try:
+        profile_data = SpotifyService.get_current_user(authorization)
+        return get_or_create_user(profile_data)
+    
+    except SpotifyError as error:
+        return error_response(error.status_code, error.message)
+    
+    except Exception as e:
+        return error_response(500, str(e))
 
 @app.route('/users/<id>', methods=["GET", "PUT", "DELETE"])
 def users_route(id: str):
@@ -44,6 +61,10 @@ def get_top_items(type: str):
         return error_response(400, "Authorization Header not present")
 
     user_id = request.get_json().get('user_id', None);
+
+    if user_id is None or user_id == '':
+        return error_response(400, "user_id is not present")
+    
     try:
         if type == "artists":
             top_items = create_top_artist(user_id, authorization)

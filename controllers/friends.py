@@ -1,21 +1,28 @@
 from models.friends import FriendRequestStatus, FriendRequests
+from models.user import User
 from config.database import db
 
 
 def add_friend(sender: str, receiver: str):
     existing_request = FriendRequests.query.filter_by(
         user_id = sender,
-        friend_id = receiver
+        friend_id = receiver,
     ).one_or_none()
 
     if existing_request is None:
+        user = User.query.get({"id" : sender})
+        user = user.toDict()
+
         new_request = FriendRequests(
             user_id = sender,
             friend_id = receiver,
+            sender_username = user.get('spotify_username', ''),
+            sender_avatar = user.get('profile_image', ''),
             status = FriendRequestStatus.pending
         )
         db.session.add(new_request)
         db.session.commit()
+    # Select needed columns from DB
         return { **new_request.toDict(), "status": new_request.toDict()["status"].value }
     
     return { **existing_request.toDict(), "status": existing_request.toDict()["status"].value }
@@ -68,3 +75,46 @@ def block_friend(sender: str, receiver: str):
     db.session.commit()
     return request_2 #number of rows affected
 
+def check_friend_status(sender: str, receiver: str):
+    request_1 = FriendRequests.query.filter_by(
+        user_id = sender,
+        friend_id = receiver,
+        status = FriendRequestStatus.accepted
+    ).one_or_none()
+
+    if request_1 is not None:
+        return True
+
+    request_2 = FriendRequests.query.filter_by(
+        friend_id = sender,
+        user_id = receiver,
+        status = FriendRequestStatus.accepted
+    ).one_or_none()
+
+    if request_2 is not None:
+        return True
+    else:
+        return False
+
+
+def list_friend_requests(user_id: str):
+    friend_requests = FriendRequests.query.filter_by(
+        friend_id = user_id,
+        status = FriendRequestStatus.pending
+    ).\
+    all()
+    print(friend_requests, "requests")
+
+    friend_requests = [
+       { 
+            "user_id": item.toDict()["user_id"] ,
+            "friend_id": item.toDict()["friend_id"],
+            "sender_username": item.toDict()["sender_username"],
+            "sender_avatar": item.toDict()["sender_avatar"],
+            "created_at": item.toDict()["created_at"],
+        } 
+        for item in friend_requests
+   ] 
+    
+    
+    return friend_requests
