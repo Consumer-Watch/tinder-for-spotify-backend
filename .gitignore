@@ -1,3 +1,5 @@
 tokens.txt
 __pycache__
 .env
+
+sonder-credentials.json
