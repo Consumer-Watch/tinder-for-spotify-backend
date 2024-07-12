@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, jsonify
+from services.firebase import Firebase
 from services.spotify import SpotifyService
 import requests
 import os
@@ -21,6 +22,7 @@ migrate.init_app(app, db)
 
 @app.route("/")
 def welcome():
+    #Firebase.add_to_firestore({ "hello": "day" })
     return "Welcome to Spotinder!"
 
 @app.route('/login', methods=["GET"])

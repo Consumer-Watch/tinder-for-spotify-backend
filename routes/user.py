@@ -1,6 +1,6 @@
 from config.app import app
 from flask import request, jsonify
-from controllers.user import get_all_users, get_or_create_user, get_user
+from controllers.user import get_all_users, get_or_create_user, get_user, update_user
 from controllers.usertopartists import get_top_artists
 from services.spotify import SpotifyService
 from utils.responses import error_response, success_response
@@ -104,6 +104,32 @@ def currently_playing():
         return error_response(error.status_code, error.message)
     except Exception as error:
         return error_response(500, str(error))
+    
+@app.route('/users/me/banner', methods=['PUT'])
+def change_banner():
+    user_id = request.args.get('user_id', None)
+    url = request.get_json().get('url', None)
+
+    if user_id is None or user_id == '':
+        return error_response(400, "user_id is not present in query string")
+    
+    if url is None or url == '':
+        return error_response(400, "url is not present in request body")
+    
+    return update_user(user_id, { "banner": url })
+
+@app.route('/users/me/avatar', methods=['PUT'])
+def change_avatar():
+    user_id = request.args.get('user_id', None)
+    url = request.get_json().get('url', None)
+
+    if user_id is None or user_id == '':
+        return error_response(400, "user_id is not present in query string")
+    
+    if url is None or url == '':
+        return error_response(400, "url is not present in request body")
+    
+    return update_user(user_id, { "profile_image": url })
 
 
 @app.route('/users')
