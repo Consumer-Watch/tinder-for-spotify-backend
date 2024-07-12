@@ -24,7 +24,7 @@ def get_or_create_user(user_data: any):
         email = user_data["email"],
         profile_image = user_data["images"][-1]["url"] if user_data["images"] else "",
         country = user_data["country"],
-        banner = "",
+        banner = "https://firebasestorage.googleapis.com/v0/b/sonder-63ac2.appspot.com/o/banners%2Fdefault-banner%20(1).png?alt=media&token=950a6bec-fb22-4df2-b6e7-553fc861658c",
         friend_count = 0
     )
     db.session.add(new_user)
