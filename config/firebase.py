@@ -17,4 +17,4 @@ def get_credentials():
     else:
         return None
     
-default_app = firebase_admin.initialize_app(credential=get_credentials())
+default_app = firebase_admin.initialize_app(credential=None)
