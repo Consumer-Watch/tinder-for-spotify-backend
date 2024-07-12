@@ -1,5 +1,4 @@
 from flask import Flask, request, redirect, jsonify
-from services.firebase import Firebase
 from services.spotify import SpotifyService
 import requests
 import os
