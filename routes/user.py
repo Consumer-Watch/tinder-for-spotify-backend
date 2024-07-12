@@ -11,23 +11,24 @@ from controllers.usertopartists import create_top_artist
 from controllers.usertoptracks import create_top_track, get_top_tracks
 from validators.spotify import SpotifyError
 
-@app.route('/users/me', methods=["GET", "POST", "PUT"])
+@app.route('/users/me', methods=["GET", "PUT"])
 def me_route():
     authorization = request.headers['Authorization']
-    updated_fields = request.get_json().get('updated_fields', None)
 
     if authorization == None:
         return error_response(400, "Access Token not present in request")
 
     try:
         profile_data = SpotifyService.get_current_user(authorization)
+        user_id = profile_data.get('id')
 
         if request.method == "PUT":
-            if updated_fields is None:
-                return error_response(400, 'updated_fields missing in request body')
-            
-            id = profile_data.get('id')
-            return update_user(id, updated_fields)
+            updated_fields = request.get_json() if request.get_json() else None
+            print(updated_fields)
+
+            if bool(updated_fields):
+                return update_user(user_id, updated_fields)
+                        
         else:
             return get_or_create_user(profile_data)
     
