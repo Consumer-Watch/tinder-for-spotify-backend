@@ -157,7 +157,7 @@ def list_friends(user_id: str):
             "profile_image": profile_image,
             "bio": bio,
         } 
-        for (user_id, spotify_username, name, profile_image, bio) in friend_set_1 + friend_set_2
+        for (user_id, spotify_username, profile_image, name, bio) in friend_set_1 + friend_set_2
    ] 
     
     
