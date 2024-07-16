@@ -103,7 +103,6 @@ def list_friend_requests(user_id: str):
         status = FriendRequestStatus.pending
     ).\
     all()
-    print(friend_requests, "requests")
 
     friend_requests = [
        { 
@@ -118,3 +117,48 @@ def list_friend_requests(user_id: str):
     
     
     return friend_requests
+
+def list_friends(user_id: str):
+    friend_set_1 = db.session.query(FriendRequests).filter_by(
+        user_id = user_id,
+        status = FriendRequestStatus.accepted
+    ).join(
+        User,
+        User.id == FriendRequests.friend_id
+    ).with_entities(
+        User.id,
+        User.spotify_username,
+        User.profile_image,
+        User.name,
+        User.bio
+    ).all()
+        
+
+    friend_set_2 = db.session.query(FriendRequests).filter_by(
+        friend_id = user_id,
+        status = FriendRequestStatus.accepted
+    ).join(
+        User,
+        User.id == FriendRequests.user_id
+    ).with_entities(
+        User.id,
+        User.spotify_username,
+        User.profile_image,
+        User.name,
+        User.bio
+    ).all()
+
+
+    friends = [
+       { 
+            "id": user_id,
+            "name": name,
+            "username": spotify_username,
+            "profile_image": profile_image,
+            "bio": bio,
+        } 
+        for (user_id, spotify_username, name, profile_image, bio) in friend_set_1 + friend_set_2
+   ] 
+    
+    
+    return friends
