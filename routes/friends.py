@@ -1,7 +1,7 @@
 from config.app import app
 from flask import request
 
-from controllers.friends import accept_request, add_friend, block_friend, check_friend_status, list_friend_requests, reject_request
+from controllers.friends import accept_request, add_friend, block_friend, check_friend_status, list_friend_requests, list_friends, reject_request
 from controllers.user import update_user
 from models.user import User
 from utils.responses import error_response, success_response
@@ -88,4 +88,16 @@ def get_friend_requests():
     except Exception as e:
         return error_response(500, str(e))
 
+@app.route('/friends/list', methods=["GET"])
+def get_friends_list():
+    user_id = request.args.get('user_id', None)
+
+    if user_id is None or user_id == "":
+        return error_response(400, "user_id not present in query string")
+    
+    try:
+        friends_list = list_friends(user_id)
+        return success_response(friends_list)
+    except Exception as e:
+        return error_response(500, str(e))
 
