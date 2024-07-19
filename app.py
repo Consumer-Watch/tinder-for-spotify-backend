@@ -1,12 +1,16 @@
 from flask import Flask, request, redirect, jsonify
+from flask_mail import Message
 from services.spotify import SpotifyService
 import requests
 import os
+from utils.functions import send_email_to_user
 from utils.responses import success_response, error_response
 from flask_migrate import Migrate
 
 from config.app import app
 from config.database import db
+from config.mail import mail
+
 
 from routes import user, friends
 
@@ -17,6 +21,10 @@ migrate.init_app(app, db)
 #manager = Manager(app)
 
 #manager.add_command('db', migrate)
+
+
+
+
 
 
 @app.route("/")
@@ -47,6 +55,10 @@ def index_route():
     except:
         return error_response()
 
+@app.route('/mail', methods=["GET"])
+def send_mail():
+    send_email_to_user("hello", "testing", ["fortune0208@yahoo.com"])
+    return 'Email sent succesfully!'
 
 @app.route('/token')
 def profile():
