@@ -5,6 +5,7 @@ from utils.functions import send_email_to_user
 
 
 def add_friend(sender: str, receiver: str):
+    print(sender, receiver)
     existing_request = FriendRequests.query.filter_by(
         user_id = sender,
         friend_id = receiver,
@@ -14,8 +15,8 @@ def add_friend(sender: str, receiver: str):
         user = User.query.get({"id" : sender})
         user = user.toDict()
 
-        receiver = User.query.get({"id" : receiver})
-        receiver = receiver.toDict()
+        receiving_user = User.query.get({"id" : receiver})
+        receiving_user = receiving_user.toDict()
 
         new_request = FriendRequests(
             user_id = sender,
@@ -30,7 +31,7 @@ def add_friend(sender: str, receiver: str):
         send_email_to_user(
             "New Friend Request",
             f"{user['name']} sent you a friend request on Sonder. Open the app to check it out!",
-            [receiver['email']]
+            [receiving_user['email']]
         )
     # Select needed columns from DB
         return { **new_request.toDict(), "status": new_request.toDict()["status"].value }
@@ -41,8 +42,8 @@ def accept_request(sender: str, receiver: str):
     user = User.query.get({"id" : sender})
     user = user.toDict()
 
-    receiver = User.query.get({"id" : receiver})
-    receiver = receiver.toDict()
+    receiving_user = User.query.get({"id" : receiver})
+    receiving_user = receiving_user.toDict()
 
     existing_request = FriendRequests.query.filter_by(
         user_id = sender,
@@ -56,7 +57,7 @@ def accept_request(sender: str, receiver: str):
 
     send_email_to_user(
         "New Friend Request",
-        f"{receiver['name']} accepted your friend request on Sonder. Open the app to check it out!",
+        f"{receiving_user['name']} accepted your friend request on Sonder. Open the app to check it out!",
         [user['email']]
     )
     return existing_request #number of rows affected
