@@ -1,3 +1,4 @@
+from models.friends import FriendRequests
 from models.user import User
 from flask import request, jsonify
 from config.database import db
@@ -63,13 +64,17 @@ def update_user(id: str, updated_fields: any):
         return error_response(500, str(e))
     
 
-def get_all_users():
+def get_all_users(user_id: str):
     try:
         
         users = db.session.query(User, UserTopArtists, UserTopTracks, UserTopGenres).\
         join(UserTopArtists).\
         join(UserTopTracks).\
         join(UserTopGenres).\
+        join(FriendRequests, FriendRequests.user_id != User.id).\
+        filter(User.id != user_id).\
+        filter(FriendRequests.user_id != user_id).\
+        filter(FriendRequests.friend_id != user_id).\
         all()
         
         users = [{
