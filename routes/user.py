@@ -144,4 +144,8 @@ def change_avatar():
 
 @app.route('/users')
 def get_similar_users():
-    return get_all_users()
+    user_id = request.args.get('user_id', None)
+    if user_id is None or user_id == '':
+        return error_response(400, "user_id is not present in query string")
+
+    return get_all_users(user_id)
