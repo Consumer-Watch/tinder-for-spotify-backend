@@ -56,7 +56,7 @@ def accept_request(sender: str, receiver: str):
     db.session.commit()
 
     send_email_to_user(
-        "New Friend Request",
+        "Friend Request Accepted",
         f"{receiving_user['name']} accepted your friend request on Sonder. Open the app to check it out!",
         [user['email']]
     )
