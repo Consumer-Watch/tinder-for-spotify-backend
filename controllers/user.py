@@ -1,13 +1,11 @@
 from models.friends import FriendRequests
 from models.user import User
-from flask import request, jsonify
 from config.database import db
 from models.usertopartists import UserTopArtists
 from models.usertoptracks import UserTopTracks
 from models.usertopgenres import UserTopGenres
 from utils.responses import success_response, error_response
-import requests
-
+from datetime import datetime
 from validators.spotify import SpotifyError
 
 
@@ -35,17 +33,18 @@ def get_or_create_user(user_data: any):
     return success_response(new_user, 201)
    
 
-        
-        
-            
-        
-
-
-
 def get_user(id: str):
-    user = User.query.get(id).toDict()
+    user = User.query.get(id)
+    
     if user is None:
         return error_response(404, "User does not exist")
+    
+    user_dict = user.toDict()
+    
+    user = {
+        **user_dict,
+        "created_at": user_dict["created_at"].strftime("%B %Y") if user_dict.get("created_at") else None
+    }
     
     return success_response(user)
 
