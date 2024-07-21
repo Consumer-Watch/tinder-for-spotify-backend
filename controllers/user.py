@@ -13,6 +13,11 @@ def get_or_create_user(user_data: any):
     user_instance = User.query.get(user_data["id"])
     if user_instance is not None:
         user = user_instance.toDict()
+        user = {
+            **user,
+            "created_at": user["created_at"].strftime("%B %Y") if user.get("created_at") else None
+        }
+
         return success_response(user, 200)
     
     new_user = User(
@@ -30,6 +35,11 @@ def get_or_create_user(user_data: any):
     db.session.commit()
 
     new_user = new_user.toDict()
+    
+    new_user = {
+        **new_user,
+        "created_at": new_user["created_at"].strftime("%B %Y") if new_user.get("created_at") else None
+    }
     return success_response(new_user, 201)
    
 
