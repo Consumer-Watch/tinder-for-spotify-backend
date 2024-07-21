@@ -2,16 +2,21 @@ from models.friends import FriendRequestStatus, FriendRequests
 from models.user import User
 from config.database import db
 from utils.functions import send_email_to_user
+import asyncio
 
 
 def add_friend(sender: str, receiver: str):
-    print(sender, receiver)
     existing_request = FriendRequests.query.filter_by(
         user_id = sender,
         friend_id = receiver,
     ).one_or_none()
 
-    if existing_request is None:
+    existing_request_2 = FriendRequests.query.filter_by(
+        user_id = receiver,
+        friend_id = sender
+    ).one_or_none()
+
+    if existing_request is None and existing_request_2 is None:
         user = User.query.get({"id" : sender})
         user = user.toDict()
 
@@ -34,9 +39,13 @@ def add_friend(sender: str, receiver: str):
             [receiving_user['email']]
         )
     # Select needed columns from DB
-        return { **new_request.toDict(), "status": new_request.toDict()["status"].value }
+        return { **new_request.toDict(), "status": new_request.toDict()["status"].value }, 201
     
-    return { **existing_request.toDict(), "status": existing_request.toDict()["status"].value }
+    if existing_request is None:
+        return { **existing_request_2.toDict(), "status": existing_request_2.toDict()["status"].value }, 200
+
+    if existing_request_2 is None:
+        return { **existing_request.toDict(), "status": existing_request.toDict()["status"].value }, 200
 
 def accept_request(sender: str, receiver: str):
     user = User.query.get({"id" : sender})
@@ -56,7 +65,7 @@ def accept_request(sender: str, receiver: str):
     db.session.commit()
 
     send_email_to_user(
-        "New Friend Request",
+        "Friend Request Accepted",
         f"{receiving_user['name']} accepted your friend request on Sonder. Open the app to check it out!",
         [user['email']]
     )

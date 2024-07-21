@@ -12,8 +12,8 @@ def make_friend_request():
     sender, receiver = validate_friend_request(request)
 
     try:
-        friend_request = add_friend(sender, receiver)
-        return success_response(friend_request, 201)
+        friend_request, status = add_friend(sender, receiver)
+        return success_response(friend_request, status)
     except Exception as error:
         return error_response(500, str(error))
 
