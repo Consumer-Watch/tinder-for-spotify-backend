@@ -7,6 +7,7 @@ from models.usertopgenres import UserTopGenres
 from utils.responses import success_response, error_response
 from datetime import datetime
 from validators.spotify import SpotifyError
+from sqlalchemy import or_, and_
 
 
 def get_or_create_user(user_data: any):
@@ -80,23 +81,32 @@ def get_all_users(user_id: str):
         join(UserTopArtists).\
         join(UserTopTracks).\
         join(UserTopGenres).\
-        join(FriendRequests, FriendRequests.user_id != User.id).\
+        outerjoin(FriendRequests, or_(
+            FriendRequests.user_id == User.id,
+            FriendRequests.friend_id == User.id
+        )).\
         filter(User.id != user_id).\
-        filter(FriendRequests.user_id != user_id).\
-        filter(FriendRequests.friend_id != user_id).\
+        filter(or_(
+            FriendRequests.id == None,  # No friend request exists
+            and_(
+                FriendRequests.user_id != user_id,
+                FriendRequests.friend_id != user_id
+            )
+        )).\
         all()
+
         
         users = [{
             **user.toDict(),
             "artist": user_top_artists.toDict()["artists"]["data"][0],
             "track": user_top_tracks.toDict()["tracks"]["data"][0],
-            "likes": user_top_genres.toDict()["genres"]["data"]
+            "likes": user_top_genres.toDict()["genres"]["data"][0:6]
 
         } for (
             user, 
             user_top_artists, 
             user_top_tracks,
-            user_top_genres
+            user_top_genres,
         ) in users]
 
         return success_response(users)
