@@ -95,20 +95,18 @@ def get_all_users(user_id: str):
         )).\
         all()
 
+
         
-        users = [{
-            **user.toDict(),
-            "artist": user_top_artists.toDict()["artists"]["data"][0],
-            "track": user_top_tracks.toDict()["tracks"]["data"][0],
-            "likes": user_top_genres.toDict()["genres"]["data"][0:6]
-
-        } for (
-            user, 
-            user_top_artists, 
-            user_top_tracks,
-            user_top_genres,
-        ) in users]
-
+        users = [
+            {
+                **user.toDict(),
+                "artist": next(iter(user_top_artists.toDict().get("artists", {}).get("data", [])), None),
+                "track": next(iter(user_top_tracks.toDict().get("tracks", {}).get("data", [])), None),
+                "likes": user_top_genres.toDict().get("genres", {}).get("data", [])
+            }
+            for user, user_top_artists, user_top_tracks, user_top_genres in users
+            if user_top_artists.toDict().get("artists", {}).get("data") and user_top_tracks.toDict().get("tracks", {}).get("data")
+        ]
         return success_response(users)
     except Exception as e:
         return error_response(500, str(e))
