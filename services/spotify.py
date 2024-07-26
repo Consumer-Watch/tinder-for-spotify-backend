@@ -43,7 +43,9 @@ class SpotifyService:
                 "name": active_device["name"],
                 "type": active_device["type"]
             },
-            "artists": [artist['name'] for artist in artists] if artists else [episode_publisher]
+            "artists": [artist['name'] for artist in artists] if artists else [episode_publisher],
+            "id": audio_item["id"],
+            #"href": audio_item["href"],
         }
     
     @classmethod
@@ -65,6 +67,7 @@ class SpotifyService:
                 "image": item['images'][-1]['url'] if item['images'] else None, 
                 "id": item["id"], 
                 "position": index + 1,
+                #"href": item["href"]
 
             } for index, item in enumerate(top_items)]
     
@@ -75,6 +78,7 @@ class SpotifyService:
                 "id": item["id"], 
                 "position": index+1,
                 "preview_url": item["preview_url"],
+                #"href": item["href"],
                 "artists": [{ 
                     "id": artist["id"], 
                     "name": artist["name"],
