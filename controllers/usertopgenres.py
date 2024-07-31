@@ -30,8 +30,10 @@ def create_top_genres(user_id: str, authorization: str):
 
         updated_date = get_future_date(top_genres['next_update'])
         UserTopGenres.query.filter_by(id = top_genres["id"]).update(
-            genres = genres,
-            next_update = updated_date
+            values={
+                "genres": genres,
+                "next_update": updated_date
+            }
         )
         db.session.commit()
         #return updated genres if top genres are updated
