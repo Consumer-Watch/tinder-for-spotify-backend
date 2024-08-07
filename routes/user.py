@@ -1,8 +1,9 @@
 from config.app import app
 from flask import request, jsonify
-from controllers.user import get_all_users, get_or_create_user, get_user, update_user
+from controllers.user import embed_users, get_all_users, get_or_create_user, get_user, query_for_users, update_user
 from controllers.usertopartists import get_top_artists
 from services.spotify import SpotifyService
+from utils.gemini import ask_gemini
 from utils.responses import error_response, success_response
 from utils.spotify import get_top_items_from_api
 
@@ -149,3 +150,39 @@ def get_similar_users():
         return error_response(400, "user_id is not present in query string")
 
     return get_all_users(user_id)
+
+'''
+@app.route('/users/vectors')
+def send_users_to_vectors():
+    return embed_users()
+
+
+'''
+
+@app.route('/search', methods=['POST'])
+def query_users():
+    query = request.args.get('query', None)
+
+    user = request.get_json().get('user', None)
+
+    if query is None or query == '':
+        return error_response(400, "query is not present in query string")
+    
+    if user is None or user == '':
+        return error_response(400, "user_id is not present in query string")
+
+    user_id = user["id"]
+
+    try:
+        results = query_for_users(query, user_id)
+        users = [data['metadata'] for data in results['matches']]
+
+        summary = ask_gemini(users, user)
+
+        answer = {
+            "users": users,
+            "summary": summary
+        }
+        return success_response(answer)
+    except Exception as e:
+        return error_response(500, str(e))
