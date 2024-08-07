@@ -5,20 +5,29 @@ from models.usertopartists import UserTopArtists
 from models.usertoptracks import UserTopTracks
 from models.usertopgenres import UserTopGenres
 from utils.embeddings import create_embeddings
+from utils.functions import get_month_and_year
 from utils.pinecone import find_vectors, push_vectors
 from utils.responses import success_response, error_response
 from datetime import datetime
 from validators.spotify import SpotifyError
 from sqlalchemy import or_, and_
+from sqlalchemy.orm import defer
+
+from serializers.user import user_schema
+
+
+
 
 
 def get_or_create_user(user_data: any):
     user_instance = User.query.get(user_data["id"])
+
     if user_instance is not None:
-        user = user_instance.toDict()
+        user = user_schema.dump(user_instance)
+
         user = {
             **user,
-            "created_at": user["created_at"].strftime("%B %Y") if user.get("created_at") else None
+            "created_at": get_month_and_year(user["created_at"])
         }
 
         return success_response(user, 200)
@@ -37,11 +46,11 @@ def get_or_create_user(user_data: any):
     db.session.add(new_user)
     db.session.commit()
 
-    new_user = new_user.toDict()
+    new_user = user_schema.dump(new_user)
     
     new_user = {
         **new_user,
-        "created_at": new_user["created_at"].strftime("%B %Y") if new_user.get("created_at") else None
+        "created_at": get_month_and_year(new_user["created_at"])
     }
     return success_response(new_user, 201)
    
@@ -52,11 +61,12 @@ def get_user(id: str):
     if user is None:
         return error_response(404, "User does not exist")
     
-    user_dict = user.toDict()
+    user_dict = user_schema.dump(user)
+
     
     user = {
         **user_dict,
-        "created_at": user_dict["created_at"].strftime("%B %Y") if user_dict.get("created_at") else None
+        "created_at": get_month_and_year(user_dict["created_at"])
     }
     
     return success_response(user)
@@ -78,7 +88,7 @@ def update_user(id: str, updated_fields: any):
 
 def get_all_users(user_id: str):
     try:
-        user = User.query.get(user_id)
+        #user = User.query.get(user_id)
         
         users = db.session.query(User, UserTopArtists, UserTopTracks, UserTopGenres).\
         join(UserTopArtists).\
@@ -98,11 +108,12 @@ def get_all_users(user_id: str):
         )).\
         all()
 
+        wanted_keys = ['id', 'spotify_username', 'email', 'profile_image', 'name', 'bio', 'banner']
 
         
         users = [
             {
-                **user.toDict(),
+                **{key: user.toDict()[key] for key in wanted_keys if key in user.toDict()},
                 "artist": next(iter(user_top_artists.toDict().get("artists", {}).get("data", [])), None),
                 "track": next(iter(user_top_tracks.toDict().get("tracks", {}).get("data", [])), None),
                 "likes": user_top_genres.toDict().get("genres", {}).get("data", [])
