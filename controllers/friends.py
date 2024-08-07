@@ -2,7 +2,7 @@ from models.friends import FriendRequestStatus, FriendRequests
 from models.user import User
 from config.database import db
 from utils.functions import send_email_to_user
-import asyncio
+from serializers.user import user_schema
 
 
 def add_friend(sender: str, receiver: str):
@@ -18,10 +18,12 @@ def add_friend(sender: str, receiver: str):
 
     if existing_request is None and existing_request_2 is None:
         user = User.query.get({"id" : sender})
-        user = user.toDict()
+        user = user_schema.dump(user)
+
 
         receiving_user = User.query.get({"id" : receiver})
-        receiving_user = receiving_user.toDict()
+        receiving_user = user_schema.dump(receiving_user)
+
 
         new_request = FriendRequests(
             user_id = sender,
@@ -49,10 +51,11 @@ def add_friend(sender: str, receiver: str):
 
 def accept_request(sender: str, receiver: str):
     user = User.query.get({"id" : sender})
-    user = user.toDict()
+    user = user_schema.dump(user)
+
 
     receiving_user = User.query.get({"id" : receiver})
-    receiving_user = receiving_user.toDict()
+    receiving_user = user_schema.dump(receiving_user)
 
     existing_request = FriendRequests.query.filter_by(
         user_id = sender,
