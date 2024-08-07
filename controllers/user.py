@@ -4,6 +4,8 @@ from config.database import db
 from models.usertopartists import UserTopArtists
 from models.usertoptracks import UserTopTracks
 from models.usertopgenres import UserTopGenres
+from utils.embeddings import create_embeddings
+from utils.pinecone import find_vectors, push_vectors
 from utils.responses import success_response, error_response
 from datetime import datetime
 from validators.spotify import SpotifyError
@@ -76,6 +78,7 @@ def update_user(id: str, updated_fields: any):
 
 def get_all_users(user_id: str):
     try:
+        user = User.query.get(user_id)
         
         users = db.session.query(User, UserTopArtists, UserTopTracks, UserTopGenres).\
         join(UserTopArtists).\
@@ -107,7 +110,51 @@ def get_all_users(user_id: str):
             for user, user_top_artists, user_top_tracks, user_top_genres in users
             if user_top_artists.toDict().get("artists", {}).get("data") and user_top_tracks.toDict().get("tracks", {}).get("data")
         ]
+
         return success_response(users)
     except Exception as e:
         return error_response(500, str(e))
+
+def query_for_users(query: str, user_id: str):
+    query_embedding = create_embeddings(query)
+    return find_vectors(query_embedding, user_id)
+
+
+def embed_users():
+    users = db.session.query(User, UserTopArtists, UserTopGenres).\
+        join(UserTopArtists).\
+        join(UserTopGenres)
+
+    users = [
+        {
+            **user.toDict(),
+            "artists": [artist["name"] for artist in user_top_artists.toDict().get("artists", {}).get("data", [])],
+            "likes": user_top_genres.toDict().get("genres", {}).get("data", [])
+        }
+        for user, user_top_artists, user_top_genres in users
+        if user_top_artists.toDict().get("artists", {}).get("data")
+    ]
+
+    for user in users:
+        artists = user['artists']
+        likes = user['likes']
+        text = ", ".join(likes) + ", ".join(artists)
+
+        user_metadata = {
+            "bio": user['bio'],
+            "artists": artists,
+            "likes": likes,
+            "id": user['id'],
+            "name": user['name'],
+            "spotify_username": user['spotify_username'],
+            "profile_image": user['profile_image'],
+        }
+        embedding = create_embeddings(text)
+        update_user(user['id'], { "data_embedding": embedding })
+        push_vectors(embedding=create_embeddings(text), metadata=user_metadata)
+
+
+    return success_response(users)
+
+
     
