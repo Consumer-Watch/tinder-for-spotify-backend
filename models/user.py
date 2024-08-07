@@ -1,6 +1,8 @@
 from config.database import db
 from sqlalchemy import inspect
 from datetime import datetime
+from pgvector.sqlalchemy import Vector
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -14,6 +16,7 @@ class User(db.Model):
     country = db.Column(db.String(2))
     friend_count = db.Column(db.Integer, default=0)
     banner = db.Column(db.String)
+    data_embedding = db.Column(Vector(768))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
