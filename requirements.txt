@@ -12,6 +12,7 @@ cryptography==42.0.8
 firebase-admin==6.5.0
 Flask==3.0.3
 Flask-Mail==0.10.0
+flask-marshmallow==1.2.1
 Flask-Migrate==4.0.7
 Flask-Script==2.0.6
 Flask-SQLAlchemy==3.1.1
@@ -36,8 +37,10 @@ itsdangerous==2.1.2
 Jinja2==3.1.3
 Mako==1.3.2
 MarkupSafe==2.1.5
+marshmallow==3.21.3
 msgpack==1.0.8
 numpy==2.0.1
+packaging==24.1
 pgvector==0.3.2
 pinecone==5.0.0
 pinecone-client==5.0.0
