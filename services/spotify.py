@@ -93,7 +93,7 @@ class SpotifyService:
         return items
     
     @classmethod
-    def get_top_items_genres(cls, authorization: str) -> list[str]:
+    def get_top_items_genres(cls, authorization: str):
             params = { "limit": 15, "offset": 0, "time_range": "medium_term" }
             headers = { "Authorization": authorization }
 
@@ -110,9 +110,9 @@ class SpotifyService:
                 if "genres" in item:
                     genre_counter.update(item["genres"])
  
-            top_genres = genre_counter.most_common(10)
+            top_genres = genre_counter.most_common(15)
             top_genres_without_count = [genre[0] for genre in top_genres if genre]
-            return top_genres_without_count
+            return top_genres_without_count, top_artists
         
     
     
