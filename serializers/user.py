@@ -10,7 +10,9 @@ class UserSchema(ma.Schema):
             "bio",
             "banner",
             "created_at",
-            "friend_count"
+            "friend_count",
+            "country",
+            "email"
         )
 
 class UserTopArtistsSchema(ma.Schema):
